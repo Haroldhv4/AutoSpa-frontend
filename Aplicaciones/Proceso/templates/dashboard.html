@@ -1,0 +1,292 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Dashboard</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* Estilos generales */
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dashboard-container {
+            width: 95%;
+            max-width: 1200px;
+            height: 90vh;
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #333;
+        }
+
+        .header button {
+            margin-right: 10px;
+        }
+
+        .header .user-counter {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+            padding: 10px 20px;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1.2rem;
+        }
+
+        .header .user-counter i {
+            margin-right: 10px;
+        }
+
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            border-radius: 12px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            color: #ffffff;
+        }
+
+        .card h3 {
+            font-size: 2rem;
+            margin: 0;
+            color: #ffffff;
+        }
+
+        /* Contenedor de la gráfica */
+        .chart-container {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Colores de las tarjetas */
+        .bg-primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+        }
+
+        .bg-success {
+            background: linear-gradient(135deg, #28a745, #1e7e34);
+        }
+
+        .bg-warning {
+            background: linear-gradient(135deg, #ffc107, #e0a800);
+        }
+
+        .bg-danger {
+            background: linear-gradient(135deg, #dc3545, #a71d2a);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .dashboard-container {
+                height: auto;
+                padding: 10px;
+            }
+
+            .cards-container {
+                grid-template-columns: 1fr;
+            }
+
+            .header h2 {
+                font-size: 1.2rem;
+            }
+
+            .card-title {
+                font-size: 1rem;
+            }
+
+            .card h3 {
+                font-size: 1.5rem;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Encabezado -->
+        <div class="header">
+            <!-- Botón "Regresar" que cierra la sesión -->
+            <a href="{% url 'logout' %}" class="btn btn-primary">
+                <i class="fa-solid fa-arrow-left"></i> Regresar
+            </a>
+            <h2>Dashboard del Administrador</h2>
+            <div class="user-counter">
+                <i class="fa-solid fa-users"></i>
+                <span>{{ total_usuarios }} Usuarios</span>
+            </div>
+        </div>
+
+        <!-- Tarjetas de Resumen -->
+        <div class="cards-container">
+            <!-- Tarjeta de Órdenes esta semana -->
+            <div class="card bg-primary">
+                <i class="fa-solid fa-calendar-week card-icon"></i>
+                <h5 class="card-title">Órdenes esta semana</h5>
+                <h3>{{ week_data }}</h3>
+            </div>
+
+            <!-- Tarjeta de Órdenes este mes -->
+            <div class="card bg-success">
+                <i class="fa-solid fa-calendar-alt card-icon"></i>
+                <h5 class="card-title">Órdenes este mes</h5>
+                <h3>{{ month_data }}</h3>
+            </div>
+
+            <!-- Tarjeta de Cotizaciones esta semana -->
+            <div class="card bg-warning">
+                <i class="fa-solid fa-file-invoice card-icon"></i>
+                <h5 class="card-title">Cotizaciones esta semana</h5>
+                <h3>{{ week_data_cotizaciones }}</h3>
+            </div>
+
+            <!-- Tarjeta de Cotizaciones este mes -->
+            <div class="card bg-danger">
+                <i class="fa-solid fa-file-invoice card-icon"></i>
+                <h5 class="card-title">Cotizaciones este mes</h5>
+                <h3>{{ month_data_cotizaciones }}</h3>
+            </div>
+        </div>
+
+        <!-- Gráfica de Órdenes por Estado -->
+        <div class="chart-container">
+            <canvas id="ordenesChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Script para la Gráfica de Órdenes -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var ctx = document.getElementById('ordenesChart').getContext('2d');
+
+            var estados = {{ total_por_estado|safe }};
+            var labels = Object.keys(estados);
+            var data = Object.values(estados);
+
+            var ordenesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Cantidad de Órdenes',
+                        data: data,
+                        backgroundColor: [
+                            'rgba(255, 99, 132, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(75, 192, 192, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(255, 99, 132, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(75, 192, 192, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Órdenes por Estado'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+
+<script>
+    function checkSession() {
+        fetch("/check-session/")
+            .then(response => response.json())
+            .then(data => {
+                if (!data.authenticated) {
+                    window.location.href = "{% url 'login' %}";
+                }
+            });
+    }
+    setInterval(checkSession, 5000);
+    document.addEventListener("DOMContentLoaded", checkSession);
+</script>
+</body>
+
+</html>

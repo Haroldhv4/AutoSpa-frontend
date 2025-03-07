@@ -131,7 +131,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 if not DEBUG:
     STATIC_ROOT = os.path.join(BASE_DIR, 'AutoSPA/static')
-    STATICFILES_DIRS = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL='/media/'
 MEDIA_ROOT=(os.path.join(BASE_DIR,'AutoSPA/media/'))
 

@@ -24,13 +24,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-%5ea=mv0*svey+ujk9owy)85wpf9=!54f$)+dxmwa!nlfj7ebz'
+SECRET_KEY = os.environ.get('SECRET_KEY', default='sdfds66fs6d6f6ds6f6')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = 'RENDER' not in os.environ
 
 ALLOWED_HOSTS = []
 
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 
 # Application definition
 
@@ -45,6 +48,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -125,7 +129,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS= (os.path.join(BASE_DIR,'AutoSPA/static'),)
+if not DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'AutoSPA/static')
+    STATICFILES_DIRS = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 MEDIA_URL='/media/'
 MEDIA_ROOT=(os.path.join(BASE_DIR,'AutoSPA/media/'))
 
